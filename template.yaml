@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    FastAPI aws lambda example
+
+Globals:
+  Function:
+    CodeUri: ./app
+    Runtime: python3.9
+    Timeout: 60
+    MemorySize: 512
+    Layers:
+      - !Ref ExternalDepsLayerForLambda
+
+Resources:
+    ExternalDepsLayerForLambda:
+      Type: AWS::Serverless::LayerVersion
+      Properties:
+        LayerName: ExternalDepsLayerFastAPI
+        ContentUri: externalDepsLayer
+        Description: Layer to use nodejs packages.
+        # delete old version of layer
+        RetentionPolicy: Delete
+      Metadata:
+        BuildMethod: python3.9
+
+    FastapiExampleLambda:
+        Type: AWS::Serverless::Function
+        Properties:
+            Events:
+                ApiEvent:
+                    Properties:
+                        RestApiId:
+                            Ref: FastapiExampleGateway
+                        Path: /{proxy+}
+                        Method: ANY
+                    Type: Api
+            FunctionName: FastAPI-lambda-example
+            Handler: main.handler
+            Description: FastAPI aws lambda example
+            # other options, see ->
+            # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html#sam-specification-template-anatomy-globals-supported-resources-and-properties
+            # Role: !Sub arn:aws:iam::${AWS::AccountId}:role/fastapilambdarole
+
+    FastapiExampleGateway:
+        Type: AWS::Serverless::Api
+        Properties:
+            StageName: prod
+            OpenApiVersion: '3.0.0'
+
+Outputs:
+  ApiUrl:
+    Description: The target URL of the created API
+    Value: !Sub "https://${FastapiExampleGateway}.execute-api.${AWS::Region}.amazonaws.com/rod/"
+    Export:
+      Name: ApiUrl
