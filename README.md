@@ -1,4 +1,4 @@
-# FastAPI for quick prototyping with python and aws lampda
+# FastAPI for quick prototyping with python and aws lambda
 
 ## Create or clone demo app
 [Simple Serverless FastAPI with AWS Lambda](https://www.deadbear.io/simple-serverless-fastapi-with-aws-lambda/)
